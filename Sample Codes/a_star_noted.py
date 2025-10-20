@@ -19,6 +19,18 @@ import matplotlib.pyplot as plt
 
 show_animation = True
 
+def add_line_segment(ox, oy, start, end):
+    x0, y0 = start
+    x1, y1 = end
+    steps = max(abs(x1 - x0), abs(y1 - y0))
+    if steps == 0:
+        ox.append(round(x0))
+        oy.append(round(y0))
+        return
+    for i in range(steps + 1):
+        t = i / steps
+        ox.append(round(x0 + (x1 - x0) * t))
+        oy.append(round(y0 + (y1 - y0) * t))
 
 class AStarPlanner:
 
@@ -276,76 +288,49 @@ def main():
     print(__file__ + " start the A star algorithm demo !!") # print simple notes
 
     # start and goal position
-    sx = 0.0  # [m]
+    sx = 50.0  # [m]
     sy = 0.0  # [m]
-    gx = 50.0  # [m]
-    gy = 0.0  # [m]
+    gx = 5.0  # [m]
+    gy = 25.0  # [m]
     grid_size = 1  # [m]
     robot_radius = 1.0  # [m]
 
-    # set obstacle positions for group 8
-    # ox, oy = [], []
-    # for i in range(-10, 60): # draw the button border 
-    #     ox.append(i)
-    #     oy.append(-10.0)
-    # for i in range(-10, 60):
-    #     ox.append(60.0)
-    #     oy.append(i)
-    # for i in range(-10, 61):
-    #     ox.append(i)
-    #     oy.append(60.0)
-    # for i in range(-10, 61):
-    #     ox.append(-10.0)
-    #     oy.append(i)
-    # for i in range(-10, 40):
-    #     ox.append(20.0)
-    #     oy.append(i)
-    # for i in range(0, 40):
-    #     ox.append(40.0)
-    #     oy.append(60.0 - i)
-
-
-    # set obstacle positions for group 9
+    # set obstacle positions for group 10
     ox, oy = [], []
-    for i in range(-10, 60): # draw the button border 
+    for i in range(-10, 61):
         ox.append(i)
         oy.append(-10.0)
-    for i in range(-10, 60): # draw the right border
+    for i in range(-10, 61):
         ox.append(60.0)
         oy.append(i)
-    for i in range(-10, 60): # draw the top border
+    for i in range(-10, 61):
         ox.append(i)
         oy.append(60.0)
-    for i in range(-10, 60): # draw the left border
+    for i in range(-10, 61):
         ox.append(-10.0)
         oy.append(i)
 
-    for i in range(-10, 30): # draw the free border
-        ox.append(20.0)
-        oy.append(i)
+    add_line_segment(ox, oy, (-10, 15), (20, 25))
+    add_line_segment(ox, oy, (20, 25), (30, 30))
+    add_line_segment(ox, oy, (30, 30), (40, 45))
+    add_line_segment(ox, oy, (40, 45), (60, 30))
+    add_line_segment(ox, oy, (20, 0), (30, 30))
+    add_line_segment(ox, oy, (30, 30), (45, 5))
+    add_line_segment(ox, oy, (45, 5), (60, 30))
 
-    for i in range(0, 20):
-        ox.append(i)
-        oy.append(-1 * i + 10)
-    
-    # for i in range(40, 45): # draw the button border 
-    #     ox.append(i)
-    #     oy.append(30.0)
-
-
-    # set cost intesive area 1
+    # set cost intensive area 1 (time-consuming)
     tc_x, tc_y = [], []
-    for i in range(10, 20):
-        for j in range(20, 50):
-            tc_x.append(i)
-            tc_y.append(j)
-    
-    # set cost intesive area 2
+    for x in range(10, 21):
+        for y in range(30, 46):
+            tc_x.append(x)
+            tc_y.append(y)
+
+    # set cost intensive area 2 (fuel-consuming)
     fc_x, fc_y = [], []
-    for i in range(30, 40):
-        for j in range(0, 20):
-            fc_x.append(i)
-            fc_y.append(j)
+    for x in range(45, 56):
+        for y in range(5, 31):
+            fc_x.append(x)
+            fc_y.append(y)
 
 
     if show_animation:  # pragma: no cover
