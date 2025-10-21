@@ -92,9 +92,9 @@ class AStarPlanner:
         """
 
         start_node = self.Node(self.calc_xy_index(sx, self.min_x), # calculate the index based on given position
-                               self.calc_xy_index(sy, self.min_y), 0.0, -1) # set cost zero, set parent index -1
+            self.calc_xy_index(sy, self.min_y), 0.0, -1) # set cost zero, set parent index -1
         goal_node = self.Node(self.calc_xy_index(gx, self.min_x), # calculate the index based on given position
-                              self.calc_xy_index(gy, self.min_y), 0.0, -1)
+            self.calc_xy_index(gy, self.min_y), 0.0, -1)
 
         open_set, closed_set = dict(), dict() # open_set: node not been tranversed yet. closed_set: node have been tranversed already
         open_set[self.calc_grid_index(start_node)] = start_node # node index is the grid index
@@ -107,18 +107,18 @@ class AStarPlanner:
             c_id = min(
                 open_set,
                 key=lambda o: open_set[o].cost + self.calc_heuristic(self, goal_node,
-                                                                     open_set[
-                                                                         o])) # g(n) and h(n): calculate the distance between the goal node and openset
+                    open_set[
+                o])) # g(n) and h(n): calculate the distance between the goal node and openset
             current = open_set[c_id]
 
             # show graph
             if show_animation:  # pragma: no cover
                 plt.plot(self.calc_grid_position(current.x, self.min_x),
-                         self.calc_grid_position(current.y, self.min_y), "xc")
+                    self.calc_grid_position(current.y, self.min_y), "xc")
                 # for stopping simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event',
-                                             lambda event: [exit(
-                                                 0) if event.key == 'escape' else None])
+                    lambda event: [exit(
+                        0) if event.key == 'escape' else None])
                 if len(closed_set.keys()) % 10 == 0:
                     plt.pause(0.001)
 
@@ -140,8 +140,8 @@ class AStarPlanner:
             # expand_grid search grid based on motion model
             for i, _ in enumerate(self.motion): # tranverse the motion matrix
                 node = self.Node(current.x + self.motion[i][0],
-                                 current.y + self.motion[i][1],
-                                 current.cost + self.motion[i][2] * self.costPerGrid, c_id)
+                    current.y + self.motion[i][1],
+                    current.cost + self.motion[i][2] * self.costPerGrid, c_id)
                 
                 ## add more cost in cost intensive area 1
                 if self.calc_grid_position(node.x, self.min_x) in self.tc_x:
@@ -258,7 +258,7 @@ class AStarPlanner:
 
         # obstacle map generation
         self.obstacle_map = [[False for _ in range(self.y_width)]
-                             for _ in range(self.x_width)] # allocate memory
+            for _ in range(self.x_width)] # allocate memory
         for ix in range(self.x_width):
             x = self.calc_grid_position(ix, self.min_x) # grid position calculation (x,y)
             for iy in range(self.y_width):
@@ -273,13 +273,13 @@ class AStarPlanner:
     def get_motion_model(): # the cost of the surrounding 8 points
         # dx, dy, cost
         motion = [[1, 0, 1],
-                  [0, 1, 1],
-                  [-1, 0, 1],
-                  [0, -1, 1],
-                  [-1, -1, math.sqrt(2)],
-                  [-1, 1, math.sqrt(2)],
-                  [1, -1, math.sqrt(2)],
-                  [1, 1, math.sqrt(2)]]
+                [0, 1, 1],
+                [-1, 0, 1],
+                [0, -1, 1],
+                [-1, -1, math.sqrt(2)],
+                [-1, 1, math.sqrt(2)],
+                [1, -1, math.sqrt(2)],
+                [1, 1, math.sqrt(2)]]
 
         return motion
 
@@ -297,38 +297,34 @@ def main():
 
     # set obstacle positions for group 10
     ox, oy = [], []
-    for i in range(-10, 61):
+    for i in range(-10, 60):
         ox.append(i)
         oy.append(-10.0)
-    for i in range(-10, 61):
+    for i in range(-10, 60):
         ox.append(60.0)
         oy.append(i)
-    for i in range(-10, 61):
+    for i in range(-10, 60):
         ox.append(i)
         oy.append(60.0)
-    for i in range(-10, 61):
+    for i in range(-10, 60):
         ox.append(-10.0)
         oy.append(i)
 
     add_line_segment(ox, oy, (-10, 15), (20, 25))
-    add_line_segment(ox, oy, (20, 25), (30, 30))
-    add_line_segment(ox, oy, (30, 30), (40, 45))
     add_line_segment(ox, oy, (40, 45), (60, 30))
-    add_line_segment(ox, oy, (20, 0), (30, 30))
-    add_line_segment(ox, oy, (30, 30), (45, 5))
-    add_line_segment(ox, oy, (45, 5), (60, 30))
+    add_line_segment(ox, oy, (20, 0), (40, 30))
 
     # set cost intensive area 1 (time-consuming)
     tc_x, tc_y = [], []
-    for x in range(10, 21):
-        for y in range(30, 46):
+    for x in range(10, 30):
+        for y in range(30, 45):
             tc_x.append(x)
             tc_y.append(y)
 
     # set cost intensive area 2 (fuel-consuming)
     fc_x, fc_y = [], []
-    for x in range(45, 56):
-        for y in range(5, 31):
+    for x in range(45, 55):
+        for y in range(5, 30):
             fc_x.append(x)
             fc_y.append(y)
 
