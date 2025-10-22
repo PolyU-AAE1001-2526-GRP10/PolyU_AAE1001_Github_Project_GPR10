@@ -17,7 +17,61 @@ import math
 
 import matplotlib.pyplot as plt
 
-show_animation = True
+show_animation = False
+
+PASSENGER_DEMAND = 33000
+TIME_FRAME_WEEKS = 10
+MAX_FLIGHTS_PER_WEEK = 13
+FUEL_COST_PER_KG = 0.85
+TIME_COST_LEVEL = "medium"
+
+"""
+#Scenario 1
+PASSENGER_DEMAND = 3300
+TIME_FRAME_WEEKS = 1
+MAX_FLIGHTS_PER_WEEK = 13
+FUEL_COST_PER_KG = 0.85
+TIME_COST_LEVEL = "medium"
+"""
+
+"""
+#Scenario 2
+PASSENGER_DEMAND = 1500
+TIME_FRAME_WEEKS = 4
+MAX_FLIGHTS_PER_WEEK = 7
+FUEL_COST_PER_KG = 0.96
+TIME_COST_LEVEL = "high"
+"""
+
+"""
+#Scenario 3
+PASSENGER_DEMAND = 2250
+TIME_FRAME_WEEKS = 1
+MAX_FLIGHTS_PER_WEEK = 25
+FUEL_COST_PER_KG = 0.78
+TIME_COST_LEVEL = "low"
+"""
+
+AIRCRAFT_SPEC = {
+    "A321": {
+        "fuel_rate": 54,
+        "capacity": 200,
+        "time_cost": {"low": 10, "medium": 15, "high": 20},
+        "fixed_cost": 1800,
+    },
+    "A330": {
+        "fuel_rate": 84,
+        "capacity": 300,
+        "time_cost": {"low": 15, "medium": 21, "high": 27},
+        "fixed_cost": 2000,
+    },
+    "A350": {
+        "fuel_rate": 90,
+        "capacity": 350,
+        "time_cost": {"low": 20, "medium": 27, "high": 34},
+        "fixed_cost": 2500,
+    },
+}
 
 def add_line_segment(ox, oy, start, end):
     x0, y0 = start
@@ -106,9 +160,8 @@ class AStarPlanner:
 
             c_id = min(
                 open_set,
-                key=lambda o: open_set[o].cost + self.calc_heuristic(self, goal_node,
-                    open_set[
-                o])) # g(n) and h(n): calculate the distance between the goal node and openset
+                key=lambda o: open_set[o].cost + self.calc_heuristic(open_set[o], goal_node)
+            )  # g(n) and h(n): calculate the distance between the goal node and openset
             current = open_set[c_id]
 
             # show graph
@@ -176,7 +229,7 @@ class AStarPlanner:
         # print(len(closed_set))
         # print(len(open_set))
 
-        return rx, ry
+        return rx, ry, goal_node.cost
 
     def calc_final_path(self, goal_node, closed_set):
         # generate final course
@@ -191,17 +244,16 @@ class AStarPlanner:
 
         return rx, ry
 
-    @staticmethod
     def calc_heuristic(self, n1, n2):
         w = 1.0  # weight of heuristic
         d = w * math.hypot(n1.x - n2.x, n1.y - n2.y)
         d = d * self.costPerGrid
         return d
     
-    def calc_heuristic_maldis(n1, n2):
+    def calc_heuristic_manhattan(self, n1, n2):
         w = 1.0  # weight of heuristic
-        dx = w * math.abs(n1.x - n2.x)
-        dy = w *math.abs(n1.y - n2.y)
+        dx = w * abs(n1.x - n2.x)
+        dy = w * abs(n1.y - n2.y)
         return dx + dy
 
     def calc_grid_position(self, index, min_position):
@@ -284,9 +336,31 @@ class AStarPlanner:
         return motion
 
 
-def main():
-    print(__file__ + " start the A star algorithm demo !!") # print simple notes
+def compute_aircraft_costs(passengers, trip_minutes, fuel_cost_per_kg, time_cost_level, max_flights_per_week, time_frame_weeks):
+    results = []
+    for model, spec in AIRCRAFT_SPEC.items():
+        total_flights = math.ceil(passengers / spec["capacity"])
+        flights_per_week = math.ceil(total_flights / time_frame_weeks)
+        time_cost = spec["time_cost"][time_cost_level]
+        per_flight_cost = (
+            fuel_cost_per_kg * spec["fuel_rate"] * trip_minutes
+            + time_cost * trip_minutes
+            + spec["fixed_cost"]
+        )
+        results.append(
+            {
+                "model": model,
+                "total_flights": total_flights,
+                "flights_per_week": flights_per_week,
+                "per_flight_cost": per_flight_cost,
+                "total_cost": per_flight_cost * total_flights,
+                "within_limit": flights_per_week <= max_flights_per_week,
+            }
+        )
+    return results
 
+def main():
+    print(__file__ + " start the A star algorithm demo !!")
     # start and goal position
     sx = 50.0  # [m]
     sy = 0.0  # [m]
@@ -330,23 +404,42 @@ def main():
 
 
     if show_animation:  # pragma: no cover
-        plt.plot(ox, oy, ".k") # plot the obstacle
-        plt.plot(sx, sy, "og") # plot the start position 
-        plt.plot(gx, gy, "xb") # plot the end position
-        
-        plt.plot(fc_x, fc_y, "oy") # plot the cost intensive area 1
-        plt.plot(tc_x, tc_y, "or") # plot the cost intensive area 2
-
-        plt.grid(True) # plot the grid to the plot panel
-        plt.axis("equal") # set the same resolution for x and y axis 
+        plt.plot(ox, oy, ".k")
+        plt.plot(sx, sy, "og")
+        plt.plot(gx, gy, "xb")
+        plt.plot(fc_x, fc_y, "oy")
+        plt.plot(tc_x, tc_y, "or")
+        plt.grid(True)
+        plt.axis("equal")
 
     a_star = AStarPlanner(ox, oy, grid_size, robot_radius, fc_x, fc_y, tc_x, tc_y)
-    rx, ry = a_star.planning(sx, sy, gx, gy)
+    rx, ry, trip_minutes = a_star.planning(sx, sy, gx, gy)
+    print(f"Planned trip duration from A* path: {trip_minutes:.2f} minutes")
 
-    if show_animation:  # pragma: no cover
-        plt.plot(rx, ry, "-r") # show the route 
-        plt.pause(0.001) # pause 0.001 seconds
-        plt.show() # show the plot
+    cost_results = compute_aircraft_costs(
+        PASSENGER_DEMAND,
+        trip_minutes=trip_minutes,
+        fuel_cost_per_kg=FUEL_COST_PER_KG,
+        time_cost_level=TIME_COST_LEVEL,
+        max_flights_per_week=MAX_FLIGHTS_PER_WEEK,
+        time_frame_weeks=TIME_FRAME_WEEKS,
+    )
+    for entry in cost_results:
+        if not entry["within_limit"]:
+            print(f"{entry['model']} not viable")
+        else:
+            print(
+                f"{entry['total_flights']} flights of {entry['model']} -> "
+                f"per flight ${entry['per_flight_cost']:.0f}, total ${entry['total_cost']:.0f}, "
+                f"{entry['flights_per_week']} flights/week"
+            )
+    viable = [item for item in cost_results if item["within_limit"]]
+    best_option = min(viable if viable else cost_results, key=lambda item: item["total_cost"])
+    limit_note = "" if best_option["within_limit"] else " (requires schedule change)"
+    print(
+        f"Recommended option: {best_option['flights_per_week']} weekly flights of {best_option['model']} "
+        f"(total ${best_option['total_cost']:.0f}){limit_note}"
+    )
 
 
 if __name__ == '__main__':
