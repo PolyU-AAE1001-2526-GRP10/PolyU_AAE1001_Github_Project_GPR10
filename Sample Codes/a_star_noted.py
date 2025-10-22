@@ -40,11 +40,11 @@ import matplotlib.pyplot as plt
 show_animation = False
 
 
-PASSENGER_DEMAND = 33000
-TIME_FRAME_WEEKS = 10
-MAX_FLIGHTS_PER_WEEK = 13
-FUEL_COST_PER_KG = 0.85
-TIME_COST_LEVEL = "medium"
+PASSENGER_DEMAND = 2000
+TIME_FRAME_WEEKS = 1
+MAX_FLIGHTS_PER_WEEK = 10
+FUEL_COST_PER_KG = 0.8
+TIME_COST_LEVEL = "low"
 
 """
 #Scenario 1
@@ -451,13 +451,13 @@ def main():
             print(
                 f"{entry['total_flights']} flights of {entry['model']} -> "
                 f"per flight ${entry['per_flight_cost']:.0f}, total ${entry['total_cost']:.0f}, "
-                f"{entry['flights_per_week']} flights/week"
+                f"max {entry['flights_per_week']} flights/week"
             )
     viable = [item for item in cost_results if item["within_limit"]]
     best_option = min(viable if viable else cost_results, key=lambda item: item["total_cost"])
     limit_note = "" if best_option["within_limit"] else " (requires schedule change)"
     print(
-        f"Recommended option: {best_option['flights_per_week']} weekly flights of {best_option['model']} "
+        f"Recommended option: {best_option['total_flights']} flights of {best_option['model']} "
         f"(total ${best_option['total_cost']:.0f}){limit_note}"
     )
 
