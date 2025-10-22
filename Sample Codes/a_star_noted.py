@@ -10,7 +10,27 @@ See Wikipedia article (https://en.wikipedia.org/wiki/A*_search_algorithm)
 This is the simple code for path planning class
 
 """
+"""
+#Scenario 1
+Planned trip duration from A* path: 74.25 minutes
+A321 not viable
+11 flights of A330 -> per flight $8861, total $97472, 11 flights/week
+10 flights of A350 -> per flight $10185, total $101853, 10 flights/week
+Recommended option: 11 weekly flights of A330 (total $97472)
 
+#Scenario 2
+8 flights of A321 -> per flight $7134, total $57075, 2 flights/week
+5 flights of A330 -> per flight $9993, total $49963, 2 flights/week
+5 flights of A350 -> per flight $11440, total $57201, 2 flights/week
+Recommended option: 2 weekly flights of A330 (total $49963)
+
+#Scenario 3
+Planned trip duration from A* path: 74.25 minutes
+12 flights of A321 -> per flight $5670, total $68041, 12 flights/week
+8 flights of A330 -> per flight $7979, total $63831, 8 flights/week
+7 flights of A350 -> per flight $9198, total $64384, 7 flights/week
+Recommended option: 8 weekly flights of A330 (total $63831)
+"""
 
 
 import math
@@ -18,6 +38,7 @@ import math
 import matplotlib.pyplot as plt
 
 show_animation = False
+
 
 PASSENGER_DEMAND = 33000
 TIME_FRAME_WEEKS = 10
@@ -33,7 +54,6 @@ MAX_FLIGHTS_PER_WEEK = 13
 FUEL_COST_PER_KG = 0.85
 TIME_COST_LEVEL = "medium"
 """
-
 """
 #Scenario 2
 PASSENGER_DEMAND = 1500
