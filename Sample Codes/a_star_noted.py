@@ -34,11 +34,17 @@ Recommended option: 8 weekly flights of A330 (total $63831)
 
 
 import math
-
+import os
 import matplotlib.pyplot as plt
 
 show_animation = False
 
+# Export / save options
+SAVE_PLOT = True
+SAVE_DIR = "plots"
+SAVE_FORMATS = ["png", "jpg", "svg"]  # formats to export
+SAVE_DPI = 300
+SAVE_BBOX = "tight"
 
 PASSENGER_DEMAND = 2000
 TIME_FRAME_WEEKS = 1
@@ -435,6 +441,36 @@ def main():
     a_star = AStarPlanner(ox, oy, grid_size, robot_radius, fc_x, fc_y, tc_x, tc_y)
     rx, ry, trip_minutes = a_star.planning(sx, sy, gx, gy)
     print(f"Planned trip duration from A* path: {trip_minutes:.2f} minutes")
+
+    # export the plot (recreate full figure so saved image includes obstacles, areas, start/goal and route)
+    if SAVE_PLOT:
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        fig = plt.figure(figsize=(8, 6))
+        plt.plot(ox, oy, ".k")
+        plt.plot(sx, sy, "og")
+        plt.plot(gx, gy, "xb")
+        plt.plot(fc_x, fc_y, "oy")
+        plt.plot(tc_x, tc_y, "or")
+        plt.plot(rx, ry, "-r")
+        plt.grid(True)
+        plt.axis("equal")
+        fname_base = f"route_{PASSENGER_DEMAND}_{TIME_FRAME_WEEKS}w"
+        for fmt in SAVE_FORMATS:
+            out_path = os.path.join(SAVE_DIR, f"{fname_base}.{fmt}")
+            plt.savefig(out_path, dpi=SAVE_DPI, bbox_inches=SAVE_BBOX)
+        plt.close(fig)
+    
+    # if interactive visualization requested, still show it
+    if show_animation:  # pragma: no cover
+        plt.figure()
+        plt.plot(ox, oy, ".k")
+        plt.plot(sx, sy, "og")
+        plt.plot(gx, gy, "xb")
+        plt.plot(fc_x, fc_y, "oy")
+        plt.plot(tc_x, tc_y, "or")
+        plt.plot(rx, ry, "-r")
+        plt.pause(0.001)
+        plt.show()
 
     cost_results = compute_aircraft_costs(
         PASSENGER_DEMAND,
